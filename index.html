@@ -2,25 +2,250 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Clean Landing Page</title>
+  <title>University of Abuja Result Checker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Link to external CSS -->
-  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f3f7f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .app {
+      max-width: 480px;
+      margin: auto;
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 10px;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+      color: #0f5132;
+    }
+
+    header p {
+      font-size: 13px;
+      color: #555;
+      margin-top: 6px;
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 18px;
+      background: #0f5132;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0b3d26;
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 14px;
+      border-radius: 6px;
+      display: none;
+      font-size: 14px;
+    }
+
+    .success {
+      background: #ecfdf5;
+      border: 1px solid #10b981;
+      color: #065f46;
+    }
+
+    .error {
+      background: #fef2f2;
+      border: 1px solid #ef4444;
+      color: #991b1b;
+    }
+
+    .welcome {
+      margin-bottom: 12px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    th {
+      background-color: #f3f4f6;
+    }
+
+    .token {
+      margin-top: 10px;
+      font-size: 13px;
+      font-style: italic;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Main content -->
-  <div class="container">
-    <h1>Welcome to Your Next Idea</h1>
-    <p>
-      A clean and simple landing page to help you present your project,
-      product, or initiative clearly and effectively.
-    </p>
-    <a href="#" class="button">Get Started</a>
+  <div class="app">
+    <header>
+      <h1>University of Abuja</h1>
+      <p>Department of Business Administration<br>Student Result Checker</p>
+    </header>
+
+    <!-- Student inputs -->
+    <label for="matric">Matric Number</label>
+    <input id="matric" type="text" placeholder="e.g. UNIABUJA/BUS/2021/001" />
+
+    <label for="email">Email Address</label>
+    <input id="email" type="email" placeholder="Enter your email address" />
+
+    <button onclick="checkResult()">Check Result</button>
+
+    <!-- Result output -->
+    <div id="resultBox" class="result"></div>
   </div>
 
-  <!-- Link to external JavaScript -->
-  <script src="js/script.js"></script>
+  <script>
+    /*
+      Mock results database.
+      Results are stored ONLY by matric number.
+      Email is used only to generate a one-time access token.
+    */
+    const resultsDB = {
+      "UNIABUJA/BUS/2021/001": {
+        name: "Abdul Musa",
+        results: {
+          "BUS 201": "A",
+          "ACC 203": "B",
+          "ECO 201": "A"
+        }
+      },
+      "UNIABUJA/BUS/2021/002": {
+        name: "Grace Okafor",
+        results: {
+          "BUS 201": "B",
+          "ACC 203": "B",
+          "ECO 201": "C"
+        }
+      }
+    };
+
+    /*
+      Generate a simple one-time access token
+      This is NOT stored anywhere (no persistence)
+    */
+    function generateToken() {
+      return Math.random().toString(36).substring(2, 10).toUpperCase();
+    }
+
+    /*
+      Main logic for checking result
+    */
+    function checkResult() {
+      const matric = document.getElementById("matric").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const box = document.getElementById("resultBox");
+
+      // Reset result box
+      box.style.display = "block";
+      box.className = "result";
+
+      // Basic input validation
+      if (!matric || !email) {
+        box.classList.add("error");
+        box.innerText = "Please enter your matric number and email address.";
+        return;
+      }
+
+      // Fetch student result using matric number only
+      const student = resultsDB[matric];
+
+      if (!student) {
+        box.classList.add("error");
+        box.innerText = "No result found for this matric number.";
+        return;
+      }
+
+      // Generate one-time access token for the provided email
+      const token = generateToken();
+
+      // Build result table rows
+      let rows = "";
+      for (let course in student.results) {
+        rows += `
+          <tr>
+            <td>${course}</td>
+            <td>${student.results[course]}</td>
+          </tr>
+        `;
+      }
+
+      // Display result with welcome message and token
+      box.classList.add("success");
+      box.innerHTML = `
+        <div class="welcome">
+          Welcome to Department of Business Administration 2025/2026 session,<br>
+          This initiative is brought to you by the NUAMBS President
+        </div>
+
+        <strong>Name:</strong> ${student.name}<br>
+        <strong>Matric Number:</strong> ${matric}
+
+        <table>
+          <thead>
+            <tr>
+              <th>Course</th>
+              <th>Grade</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+
+        <div class="token">
+          One-Time Access Token sent to <strong>${email}</strong>: <strong>${token}</strong>
+        </div>
+      `;
+    }
+  </script>
+
 </body>
 </html>
